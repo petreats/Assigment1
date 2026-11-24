@@ -86,13 +86,49 @@ def find_outliers(readings, threshold):
     print("Readings above the threshold:", len(above), list(above))
     print("Readings below the threshold:", len(below), list(below))
 
+def save_readings(readings):
+    if len(readings) == 0:
+        print("No readings to save. Generate or load some first.")
+        return
+    filename = input("File name to save to (e.g. readings.csv): ").strip()
+    if filename == "":
+        filename = "readings.csv"
+    if not filename.endswith(".csv"):
+        filename += ".csv"
 
-def save_readings():
-    pass
+    try:
+        with open(filename, "w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(["Reading number", "Value"])
+            for number, value in enumerate(readings, 1):
+                writer.writerow([number, value])
+        print("Saved", len(readings), "readings to", filename)
+    except OSError:
+        print("Could not save the file. Check the name and try again.")
 
 
 def load_readings():
-    pass
+    filename = input("File name to load (e.g. readings.csv): ").strip()
+    if not filename.endswith(".csv"):
+        filename += ".csv"
+
+    loaded = []
+    try:
+        with open(filename, newline="") as file:
+            reader = csv.reader(file)
+            next(reader, None)  # skip the header row
+            for row in reader:
+                loaded.append(float(row[1]))
+    except FileNotFoundError:
+        print("File not found.")
+        return []
+    except (ValueError, IndexError):
+        print("That file isn't in the right format.")
+        return []
+
+    print("Loaded", len(loaded), "readings from", filename)
+    print(loaded)
+    return loaded
 
 def plot_readings():
     pass
@@ -117,7 +153,6 @@ def ask_threshold():
         except ValueError:
             print("Please enter a number")
 
-
 def main():
     readings = []
     threshold = None
@@ -139,14 +174,15 @@ def main():
             sensor_name = SENSOR_TYPES[int(sensor) - 1].split(": ")[1]
             readings = generate_readings(count, maximum, minimum)
         elif choice == "2":
-            print("unavailable")
-            break
+            loaded = load_readings()
+            if len(loaded) > 0:
+                readings = loaded
+                sensor_name = "Loaded"
+                threshold = ask_threshold()
         elif choice == "3":
-            print("unavailable")
-            break
+            save_readings(readings)
         elif choice == "4":
-            print("unavailable")
-            break
+            visualise_data(readings, threshold, sensor_name)
         elif choice == "5":
             calculate_statistics(readings)
             find_outliers(readings, threshold)
