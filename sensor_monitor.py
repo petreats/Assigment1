@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 SENSOR_TYPES = ["1: Temperature", "2: Light", "3: Humidity", "4: Pressure", "5: Sound"]
-add_to_list = [] #for inputs from user
 
 questions = ("Select a sensor from the following sensors: " + "\n" + str(SENSOR_TYPES),
              "Choose the amount of readings you want to take",
@@ -12,7 +11,9 @@ questions = ("Select a sensor from the following sensors: " + "\n" + str(SENSOR_
              "What is the minimum limit for the data range",
              "Choose a threshold value within your range",)
 
+
 def get_user_input():
+    answers = []  # created fresh each time so old answers never carry over
     for index, question in enumerate(questions):
         while True:
             print("--------------------------------------------------------")
@@ -29,54 +30,132 @@ def get_user_input():
                 print("Please enter a number")
                 continue
 
-            #Conditions for each question
+            # Conditions for each question
             if index == 0 and answer not in (1, 2, 3, 4, 5):
                 print("Choose a number from 1 to 5")
             elif index == 1 and (answer <= 0 or answer % 1 != 0):
                 print("Readings must be a whole number greater than 0")
-            elif index == 3 and answer >= add_to_list[2]:
+            elif index == 3 and answer >= answers[2]:
                 print("Minimum must be less than the maximum")
-            elif index == 4 and not (add_to_list[3] < answer < add_to_list[2]):
+            elif index == 4 and not (answers[3] < answer < answers[2]):
                 print("Threshold must be between the minimum and maximum")
             else:
                 break
 
-        add_to_list.append(answer)
-    print(add_to_list)
-    Readings_array = np.array(add_to_list)
+        answers.append(answer)
+    return answers
 
 
-
-def generate_readings(count, max, min):
-    print("Readings generated: ")
-
+def generate_readings(count, maximum, minimum):
     readings = []
-
     for _ in range(int(count)):
-        value = round(random.uniform(min, max))
+        value = round(random.uniform(minimum, maximum), 2)
         readings.append(value)
+    print("Readings generated:")
     print(readings)
+    return readings
 
 
-def calculate_statistics():
-    pass
+def calculate_statistics(readings):
+    if len(readings) == 0:
+        print("No readings available. Generate or load some first.")
+        return
+    data = np.array(readings)
+    print("--------------------------------------------------------")
+    print("Statistics")
+    print("Count:             ", len(data))
+    print("Mean:              ", round(float(np.mean(data)), 2))
+    print("Median:            ", round(float(np.median(data)), 2))
+    print("Standard deviation:", round(float(np.std(data)), 2))
+    print("Lowest reading:    ", float(np.min(data)))
+    print("Highest reading:   ", float(np.max(data)))
 
-def find_outliers():
-    pass
+
+def find_outliers(readings, threshold):
+    if len(readings) == 0:
+        print("No readings available. Generate or load some first.")
+        return
+    if threshold is None:
+        print("No threshold set. Generate new readings or enter a threshold after loading.")
+        return
+    data = np.array(readings)
+    above = data[data > threshold]
+    below = data[data < threshold]
+    print("--------------------------------------------------------")
+    print("Threshold:", threshold)
+    print("Readings above the threshold:", len(above), list(above))
+    print("Readings below the threshold:", len(below), list(below))
+
 
 def save_readings():
+    pass
+
+
+def load_readings():
     pass
 
 def plot_readings():
     pass
 
+
 def plot_histogram():
     pass
 
+
+def visualise_data():
+    pass
+
+
+def ask_threshold():
+    # used after loading a file, since the file doesn't store the threshold
+    while True:
+        answer = input("Enter a threshold value (or press Enter to skip): ").strip()
+        if answer == "":
+            return None
+        try:
+            return float(answer)
+        except ValueError:
+            print("Please enter a number")
+
+
 def main():
-    get_user_input() 
-    generate_readings(add_to_list[1],add_to_list[2],add_to_list[3])
+    readings = []
+    threshold = None
+    sensor_name = "Sensor"
+
+    while True:
+        print("--------------------------------------------------------")
+        print("1: Generate readings")
+        print("2: Load existing readings")
+        print("3: Save readings")
+        print("4: Visualise data")
+        print("5: Statistics and threshold check")
+        print("q: Quit")
+        choice = input("Select an option: ").strip().lower()
+
+        if choice == "1":
+            answers = get_user_input()
+            sensor, count, maximum, minimum, threshold = answers
+            sensor_name = SENSOR_TYPES[int(sensor) - 1].split(": ")[1]
+            readings = generate_readings(count, maximum, minimum)
+        elif choice == "2":
+            print("unavailable")
+            break
+        elif choice == "3":
+            print("unavailable")
+            break
+        elif choice == "4":
+            print("unavailable")
+            break
+        elif choice == "5":
+            calculate_statistics(readings)
+            find_outliers(readings, threshold)
+        elif choice == "q":
+            print("Quitting")
+            break
+        else:
+            print("Please choose 1-5 or q")
+
 
 if __name__ == "__main__":
     main()
-
