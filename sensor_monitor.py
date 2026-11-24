@@ -86,6 +86,7 @@ def find_outliers(readings, threshold):
     print("Readings above the threshold:", len(above), list(above))
     print("Readings below the threshold:", len(below), list(below))
 
+
 def save_readings(readings):
     if len(readings) == 0:
         print("No readings to save. Generate or load some first.")
@@ -130,16 +131,52 @@ def load_readings():
     print(loaded)
     return loaded
 
-def plot_readings():
-    pass
+
+def plot_readings(readings, threshold, sensor_name):
+    if len(readings) == 0:
+        print("No readings to plot. Generate or load some first.")
+        return
+    plt.figure()
+    plt.plot(range(1, len(readings) + 1), readings, marker="o", label="Readings")
+    if threshold is not None:
+        plt.axhline(threshold, color="red", linestyle="--", label="Threshold")
+    plt.title(sensor_name + " readings")
+    plt.xlabel("Reading number")
+    plt.ylabel("Value")
+    plt.legend()
+    plt.show()
 
 
-def plot_histogram():
-    pass
+def plot_histogram(readings, threshold, sensor_name):
+    if len(readings) == 0:
+        print("No readings to plot. Generate or load some first.")
+        return
+    plt.figure()
+    plt.hist(readings, bins=10, edgecolor="black")
+    if threshold is not None:
+        plt.axvline(threshold, color="red", linestyle="--", label="Threshold")
+        plt.legend()
+    plt.title(sensor_name + " histogram")
+    plt.xlabel("Value")
+    plt.ylabel("Frequency")
+    plt.show()
 
 
-def visualise_data():
-    pass
+def visualise_data(readings, threshold, sensor_name):
+    if len(readings) == 0:
+        print("No readings to visualise. Generate or load some first.")
+        return
+    print("--------------------------------------------------------")
+    print("1: Plot readings")
+    print("2: Plot histogram")
+    print("3: Back")
+    choice = input("Choice: ").strip()
+    if choice == "1":
+        plot_readings(readings, threshold, sensor_name)
+    elif choice == "2":
+        plot_histogram(readings, threshold, sensor_name)
+    elif choice != "3":
+        print("Please choose 1, 2 or 3")
 
 
 def ask_threshold():
@@ -152,6 +189,7 @@ def ask_threshold():
             return float(answer)
         except ValueError:
             print("Please enter a number")
+
 
 def main():
     readings = []
